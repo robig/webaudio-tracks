@@ -1,0 +1,47 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Track Recorder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Latest compiled and minified Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="style.css">
+	<script src="js/jquery-3.4.1.min.js"></script>
+  </head>
+  <body>
+    <h1 id="title">Take Recorder</h1>
+    <p><small>Uploads sind hier: <a href="files/" >files/</a></small></p>
+
+	<template id="track_tpl">
+		<div class="track">
+			<div class="meter" style="width: 12em; height: 3em;"></div>
+			<button class="mute">mute</button>
+			<button class="arm">arm</button>
+			<input class="volume" type="range" min="0" max="100" value="100">
+			<div class="name"></div>
+		</div>
+	</template>
+	<div id="tracks">
+	</div>
+
+    <div id="controls">
+  	 <button id="playButton" disabled>Loading...</button>
+  	 <button id="recordButton" disabled>Record</button>
+  	 <button id="pauseButton" disabled>Pause</button>
+  	 <button id="stopButton" disabled>Stop</button>
+  	 <button id="playSyncButton" disabled>Play Recording</button>
+  	 <button id="armButton" >ARM</button>
+    </div>
+    <div id="formats">Format: start recording to see sample rate</div>
+  	<p><strong>Deine Aufnahmen:</strong></p>
+  	<ol id="recordingsList">
+	</ol>
+    <!-- inserting these scripts at the end to be able to use all the elements in the DOM -->
+  	<script src="js/recorder.js"></script>
+  	<script src="js/web-audio-peak-meter.min.js"></script>
+  	<script src="js/track.js"></script>
+  	<script src="js/mix.js"></script>
+  	<script src="js/mixapp.js"></script>
+  </body>
+</html>

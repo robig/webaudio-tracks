@@ -1,0 +1,9 @@
+{
+	"title": "test Jean",
+	"tracks": [
+		{ "src": "90.mp3", "name": "jacaranda_and_Drum" },
+		{ "src": "90bpm.wav","name": "Test 90bpm", "loop": true },
+		{ "name": "Record here" }
+	],
+	"none": { "src": "90bpm.wav","name": "Test 90bpm" }
+}
