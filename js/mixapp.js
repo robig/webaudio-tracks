@@ -15,8 +15,15 @@ App.oninit=function() {
 		tracks.appendChild(clon);
 		t.ui=tracks.children[tracks.children.length - 1];
 		$(t.ui).addClass(t.type);
+
+		t.onrecord=recordingdone;
 	});
 };
+
+function recordingdone(t) {
+	console.log("Recording finished", t.info.name);
+	t.ui.querySelector('.time').innerText=t.getDuration()+"s";
+}
 
 App.onload=function() {
 	App.Mix.tracks.forEach(function(t) {

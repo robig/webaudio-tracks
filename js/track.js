@@ -186,11 +186,17 @@ class Track {
 		console.log('track.recordStop', this.context.currentTime);
 		this.recorder.stop();
 		this.recorder.getBuffer(function (buffers) {
-			me.source.buffer=me._createBuffer(buffers, 2);
+			me.buffer=me._createBuffer(buffers, 2);
+			console.log("track.recording stopped");
 			me.recording=false;
 			me.audioLoaded=true;
 			if(callback) callback(me);
+			if(me.onrecord)me.onrecord(me);
 		});
+	}
+
+	getDuration() {
+		return this.buffer.duration;
 	}
 
 	/**
@@ -243,4 +249,6 @@ class Track {
 		}
 		return audioBuffer;
 	}
+
+	onrecord() {}
 }
