@@ -5,11 +5,14 @@ class Track {
 		this.ready=false;
 		this.armed=false;
 		this.recording=false;
+		this.recordMoritoring=true;
 		this.recorder=null;
 		this.offset=0;
+		this.startedAt=0;
 		this.muteVol=1;
 
 		this.info=data;
+		this.config=data.config || {};
 
 		this.context=audioContext;
 		this.gainNode = this.context.createGain();
@@ -75,7 +78,7 @@ class Track {
 		return this.gainNode.gain.value;
 	}
 
-	play() {
+	play(startTime) {
 		if(this.armed || !this.audioLoaded) return;
 
 		this.source = this.context.createBufferSource();
@@ -89,7 +92,10 @@ class Track {
 		// Start playback in a loop
 		this.source.loop = this.info.loop ? true : false;
 
-		this.source[this.source.start ? 'start' : 'noteOn'](0);
+		if(startTime===null) startTime=this.context.currentTime;
+		this.startedAt=startTime;
+		//this.source[this.source.start ? 'start' : 'noteOn'](0);
+		this.source.start(startTime);
 		this.isPlaying = true;
 	}
 
@@ -104,7 +110,7 @@ class Track {
 
 	stop() {
 		if(this.recording) this.recordStop();
-		else if(this.audioLoaded) {
+		else if(this.audioLoaded && this.source) {
 			this.source[this.source.stop ? 'stop' : 'noteOff'](0);
 			this.isPlaying = false;
 		}
@@ -154,6 +160,10 @@ class Track {
 		if (navigator.getUserMedia) {
 			navigator.getUserMedia({audio: true}, function (stream) {
 				me.input = me.context.createMediaStreamSource(stream);
+				me.input.connect(me.gainNode);
+				// Connect gain node to destination
+				if(me.recordMoritoring && me.destination) me.gainNode.connect(me.destination);
+				else me.gainNode.disconnect();
 				me.recorder = new Recorder(me.input);
 				me.armed=true;
 				console.log('track.armed');
@@ -169,13 +179,15 @@ class Track {
 	/**
 	 * @method record
 	 */
-	record() {
+	record(startTime) {
 		if(!this.armed) return;
 		console.log('track.record', this.context.currentTime);
+		this.targetStartTime=startTime || this.context.currentTime;
 		this.recorder.clear();
 		this.recording=true;
-		this.recorder.startTime = this.context.currentTime;
+		//quatsch this.recorder.startTime = this.context.currentTime;
 		this.recorder.record();
+		this.startedAt = this.recorder.startTime || this.context.currentTime;
 		return {sampleRate: this.context.sampleRate, startTime: this.recorder.startTime};
 	}
 	/**
@@ -187,16 +199,22 @@ class Track {
 		this.recorder.stop();
 		this.recorder.getBuffer(function (buffers) {
 			me.buffer=me._createBuffer(buffers, 2);
-			console.log("track.recording stopped");
+			console.log("track.recording stopped", me.context.currentTime);
 			me.recording=false;
 			me.audioLoaded=true;
+			me.recOffset = me._calcOffset(me.buffer, me.targetStartTime, me.config.recordOffset || 0);
 			if(callback) callback(me);
 			if(me.onrecord)me.onrecord(me);
 		});
 	}
 
 	getDuration() {
+		if(!this.buffer) return 0;
 		return this.buffer.duration;
+	}
+
+	getPosition() {
+		return this.context.currentTime - this.startedAt;
 	}
 
 	/**
@@ -213,13 +231,17 @@ class Track {
 	/**
 	 * @method getOffset
 	 */
-	calcOffset (vocalsRecording, backingInstance, offset) {
-		var diff = (this.recorder.startTime + (offset / 1000)) - backingInstance.startTime;
-		console.log('player.getOffset', diff);
-		return {
+	_calcOffset (recording, targetStartTime, offset) {
+		if(!offset) offset=0;
+		console.log("track.recorder.startTime:", this.recorder.getStartTime());
+		console.log("track.recordOffset:", offset);
+		console.log("track.targetStartTime:", targetStartTime);
+		var diff = (this.recorder.getStartTime() + (offset / 1000)) - targetStartTime;
+		console.log('track.getOffset', diff);
+		/*return {
 			before: Math.round((diff % backingInstance.buffer.duration) * this.context.sampleRate),
-			after: Math.round((backingInstance.buffer.duration - ((diff + vocalsRecording.duration) % backingInstance.buffer.duration)) * this.context.sampleRate)
-		};
+			after: Math.round((backingInstance.buffer.duration - ((diff + recording.duration) % backingInstance.buffer.duration)) * this.context.sampleRate)
+		};*/
 	}
 	/**
 	 * @method offsetBuffer
@@ -250,5 +272,22 @@ class Track {
 		return audioBuffer;
 	}
 
+	sync (action, target, param, callback) {
+		var me = this,
+			offset = (this.context.currentTime - target.startTime) % target.buffer.duration,
+			time = target.buffer.duration - offset;
+		console.log('player.sync', this.context.currentTime + time, action);
+		if (this.syncTimer) {
+			window.clearTimeout(this.syncTimer);
+		}
+		this.syncTimer = window.setTimeout(function () {
+			var returned = me[action](param);
+			if (callback) {
+				callback(returned);
+			}
+		}, time * 1000);
+	}
+
+	// to become a callback
 	onrecord() {}
 }

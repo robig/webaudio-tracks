@@ -3,14 +3,21 @@ var App = {
 		tracks: [],
 
 		play() {
-			App.Mix.tracks.forEach(t=>t.play());
+			App.Mix.playing=true;
+			// queues a timed playback start
+			var offset = (App.playbackOffset || 150) / 1000;
+			var context = App.Mix.tracks[0].context;
+			console.log("Que playback start at: +", offset);
+			App.Mix.tracks.forEach(t=>t.play(context.currentTime + offset));
 		},
 
 		pause() {
+			App.Mix.playing=false;
 			App.Mix.tracks.forEach(t=>t.pause());
 		},
 
 		stop() {
+			App.Mix.playing=false;
 			App.Mix.tracks.forEach(t=>t.stop());
 		},
 
@@ -19,9 +26,32 @@ var App = {
 		},
 
 		record() {
-			App.Mix.play();
-			App.Mix.tracks.filter(t=>t.armed).forEach(t=>t.record());
+			//App.Mix.play();
+			//App.Mix.tracks.filter(t=>t.armed).forEach(t=>t.record());
+			App.Mix.playing=true;
+			// queues a timed playback start
+			var offset = (App.config.playbackOffset || 150) / 1000;
+			var context = App.Mix.tracks[0].context;
+			var startTime = context.currentTime + offset;
+			console.log("Que playback start at: +", offset, startTime);
+			App.Mix.tracks.forEach(t=>t.play(startTime));
+			App.Mix.tracks.filter(t=>t.armed).forEach(t=>t.record(startTime));
+		},
+
+		armedTracks() {
+			return App.Mix.tracks.filter(t=>t.armed);
+		},
+
+		playing: false,
+
+		isPlaying() {
+			return App.Mix.playing;
 		}
+	},
+
+	getConfig: function(key) {
+		if(!App.config || !App.config[key]) return null;
+		return App.config[key];
 	},
 
 	onload: function() {
@@ -58,13 +88,14 @@ var App = {
 			// load config
 			jQuery.getJSON( "tracks.json", function( data ) {
 				console.log("track Config loaded: ", data);
+				App.config=data.config || {};
 				if(data.title)
 					$('#title').html(data.title);
 				if(data.name)
 					this.recorderName=data.name;
 				if(data.tracks) {
 					App.Mix.merger = me.context.createChannelMerger(data.tracks.length);
-					data.tracks.forEach(e => App.Mix.tracks.push(new Track(e, me.context, App.Mix.merger, App._eventLoad)));
+					data.tracks.filter(t=>t.enabled!==false).forEach(e => App.Mix.tracks.push(new Track(e, me.context, App.Mix.merger, App._eventLoad)));
 					App.Mix.merger.connect(me.context.destination);
 				}
 				App.oninit();

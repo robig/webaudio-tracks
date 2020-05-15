@@ -1,9 +1,14 @@
 {
 	"title": "test Jean",
 	"tracks": [
-		{ "src": "90.mp3", "name": "jacaranda_and_Drum" },
+		{ "src": "90bpm.wav", "name": "jacaranda_and_Drum", "enabled": false },
 		{ "src": "90bpm.wav","name": "Test 90bpm", "loop": true },
-		{ "name": "Record here" }
+		{ "src": "90bpm.wav","name": "Test 90bpm", "loop": true },
+		{ "name": "Record here", "monitor": false }
 	],
-	"none": { "src": "90bpm.wav","name": "Test 90bpm" }
+	"none": { "src": "90bpm.wav","name": "Test 90bpm" },
+	"config": { 
+		"recordOffset": 5,
+		"autoArm": true
+	}
 }
