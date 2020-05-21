@@ -17,6 +17,14 @@
 	<div id="error_message" class="alert alert-danger" role="alert" style="display:none;">
 	</div>
 
+	Playback Offset:
+	<input id="play_offset" class="Offset slider" type="range" min="0" max="500" value="100">
+	<div id="play_offset_value"></div>
+
+	Record Offset:
+	<input id="rec_offset" class="Offset slider" type="range" min="0" max="500" value="100">
+	<div id="rec_offset_value"></div>
+
 	<template id="track_tpl">
 		<div class="track">
 			<div class="meter" style="width: 12em; height: 3em;"></div>
@@ -26,6 +34,7 @@
 			<input class="volume slider" type="range" min="0" max="100" value="100">
 			<button class="mini monitor"><i class="fas fa-microphone"></i></button>
 			<div class="name"></div>
+			<input class="offset slider" type="range" min="-100" max="100" value="0">
 		</div>
 	</template>
 	<div id="tracks">

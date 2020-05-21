@@ -20,11 +20,11 @@
     });
     var recording = false,
       currCallback,
-		  startTime=0;
+	  startTime=0;
 
     this.node.onaudioprocess = function(e){
       if (!recording) return;
-	  if(!startTime) startTime=this.context.currentTime;
+	  if(!startTime) {startTime=this.context.currentTime;console.log("onaudioprocess", startTime);}
       var buffer = [];
       for (var channel = 0; channel < numChannels; channel++){
           buffer.push(e.inputBuffer.getChannelData(channel));

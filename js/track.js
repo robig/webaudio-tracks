@@ -5,13 +5,15 @@ class Track {
 		this.ready=false;
 		this.armed=false;
 		this.recording=false;
-		this.recordMoritoring=true;
+		this.recordMonitoring=true;
 		this.recorder=null;
 		this.offset=0;
 		this.startedAt=0;
 		this.muteVol=1;
+		this.playbackOffset=0;
 
 		this.info=data;
+		this.number=data.number || 1;
 		this.config=data.config || {};
 
 		this.context=audioContext;
@@ -79,7 +81,7 @@ class Track {
 	}
 
 	play(startTime) {
-		if(this.armed || !this.audioLoaded) return;
+		if(!this.audioLoaded && this.buffer) return;
 
 		this.source = this.context.createBufferSource();
 		this.source.buffer = this.buffer;
@@ -93,7 +95,9 @@ class Track {
 		this.source.loop = this.info.loop ? true : false;
 
 		if(startTime===null) startTime=this.context.currentTime;
+		startTime+=this.playbackOffset;
 		this.startedAt=startTime;
+		console.log("track.play at ", startTime);
 		//this.source[this.source.start ? 'start' : 'noteOn'](0);
 		this.source.start(startTime);
 		this.isPlaying = true;
@@ -137,13 +141,19 @@ class Track {
 		x.createMeter(myMeterElement, this.meterNode, {});
 	}
 
-	createRecMeter(myMeterElement) {
-		//var myMeterElement = document.getElementById('my-peak-meter');
-		var x = webAudioPeakMeter();
-		this.meterNode = x.createMeterNode(this.input, this.context);
-		x.createMeter(myMeterElement, this.meterNode, {});
+	setRecordMonitoring(val) {
+		var me = this;
+		this.recordMonitoring=val;
+		console.log("track.recordMonitoring:", val);
+		if(this.recordMonitoring) me.gainNode.connect(me.destination);
+		else me.gainNode.disconnect();
 	}
 
+	toggleRecordMonitoring(callback) {
+		this.setRecordMonitoring(!this.recordMonitoring);
+		if(callback) callback(this.recordMonitoring);
+		return this.recordMonitoring;
+	}
 
 	arm(callback) {
 		if(this.armed) {
@@ -162,7 +172,7 @@ class Track {
 				me.input = me.context.createMediaStreamSource(stream);
 				me.input.connect(me.gainNode);
 				// Connect gain node to destination
-				if(me.recordMoritoring && me.destination) me.gainNode.connect(me.destination);
+				if(me.recordMonitoring && me.destination) me.gainNode.connect(me.destination);
 				else me.gainNode.disconnect();
 				me.recorder = new Recorder(me.input);
 				me.armed=true;
@@ -202,7 +212,8 @@ class Track {
 			console.log("track.recording stopped", me.context.currentTime);
 			me.recording=false;
 			me.audioLoaded=true;
-			me.recOffset = me._calcOffset(me.buffer, me.targetStartTime, me.config.recordOffset || 0);
+			var recOffset = me._calcOffset(me.buffer, me.targetStartTime, me.config.recordOffset || 0);
+			me.playbackOffset = recOffset.offset;
 			if(callback) callback(me);
 			if(me.onrecord)me.onrecord(me);
 		});
@@ -238,10 +249,11 @@ class Track {
 		console.log("track.targetStartTime:", targetStartTime);
 		var diff = (this.recorder.getStartTime() + (offset / 1000)) - targetStartTime;
 		console.log('track.getOffset', diff);
-		/*return {
-			before: Math.round((diff % backingInstance.buffer.duration) * this.context.sampleRate),
-			after: Math.round((backingInstance.buffer.duration - ((diff + recording.duration) % backingInstance.buffer.duration)) * this.context.sampleRate)
-		};*/
+		return {
+			offset: diff
+			//before: Math.round((diff % backingInstance.buffer.duration) * this.context.sampleRate),
+			//after: Math.round((backingInstance.buffer.duration - ((diff + recording.duration) % backingInstance.buffer.duration)) * this.context.sampleRate)
+		};
 	}
 	/**
 	 * @method offsetBuffer

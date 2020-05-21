@@ -6,6 +6,7 @@ App.oninit=function() {
 		var clon = trackTemplate.content.cloneNode(true);
 		clon.querySelector(".name").innerText=t.info.name;
 		clon.querySelector(".meter").innerText="Loading...";
+		
 		function track_arm() {
 			var me=this;
 			t.arm(function() {
@@ -16,9 +17,17 @@ App.oninit=function() {
 			} ); 
 		};
 		clon.querySelector(".arm").addEventListener("click", track_arm);
+		
 		var vol=clon.querySelector(".volume");
 		vol.addEventListener("change", function() {t.changeVolume(this);});
 		clon.querySelector(".mute").addEventListener("click", function() { t.mute(); vol.value=t.getVolume()*100;});
+		
+		var mon = clon.querySelector(".monitor");
+		if(t.recordMonitoring) $(mon).addClass('active');
+		mon.addEventListener("click", function() { 
+			t.toggleRecordMonitoring(function(val) { if(val) $(mon).addClass('active'); else $(mon).removeClass('active'); });
+		});
+
 		tracks.appendChild(clon);
 		t.ui=tracks.children[tracks.children.length - 1];
 		$(t.ui).addClass(t.type);
@@ -64,6 +73,22 @@ App.onload=function() {
 	playButton.disabled=false;
 	playButton.innerHTML = 'Play';
 	recordButton.disabled = false;
+
+	var recOff = document.getElementById("rec_offset")
+	var recOffVal = document.getElementById("rec_offset_value")
+	new Binding({
+		object: App.config,
+		property: "recordOffset"
+	})
+	.addBinding(recOff, "value", "change")
+	.addBinding(recOffVal, "innerHTML");
+
+	new Binding({
+		object: App.config,
+		property: "playbackOffset"
+	})
+	.addBinding(document.getElementById("play_offset"), "value", "change")
+	.addBinding(document.getElementById("play_offset_value"), "innerHTML");
 };
 
 
@@ -152,7 +177,7 @@ function createDownloadLink(blob) {
 	var link = document.createElement('a');
 
 	//name of .wav file to use during upload and download (without extendion)
-	var filename = new Date().toISOString()+"_"+recorderName+".wav";
+	var filename = new Date().toISOString()+"_"+recorderName;
 
 	//add controls to the <audio> element
 	au.controls = true;
@@ -160,7 +185,7 @@ function createDownloadLink(blob) {
 
 	//save to disk link
 	link.href = url;
-	link.download = filename; //download forces the browser to donwload the file using the  filename
+	link.download = filename+".wav"; //download forces the browser to donwload the file using the  filename
 	link.innerHTML = "Download";
 
 	//add the new audio element to li
@@ -210,4 +235,5 @@ function createDownloadLink(blob) {
 	//add the li element to the ol
 	$('#recordingsList').append(li);
 }
+
 

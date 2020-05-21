@@ -5,7 +5,7 @@ var App = {
 		play() {
 			App.Mix.playing=true;
 			// queues a timed playback start
-			var offset = (App.playbackOffset || 150) / 1000;
+			var offset = (App.config.playbackOffset || 150) / 1000;
 			var context = App.Mix.tracks[0].context;
 			console.log("Que playback start at: +", offset);
 			App.Mix.tracks.forEach(t=>t.play(context.currentTime + offset));
@@ -34,18 +34,30 @@ var App = {
 			var context = App.Mix.tracks[0].context;
 			var startTime = context.currentTime + offset;
 			console.log("Que playback start at: +", offset, startTime);
-			App.Mix.tracks.forEach(t=>t.play(startTime));
-			App.Mix.tracks.filter(t=>t.armed).forEach(t=>t.record(startTime));
+			App.Mix.tracks.filter(t=>!t.armed).forEach(t=>t.play(startTime));
+			
+			setTimeout(function() {
+				App.Mix.tracks.filter(t=>t.armed).forEach(t=>t.record(startTime));
+			}, offset);
 		},
 
 		armedTracks() {
 			return App.Mix.tracks.filter(t=>t.armed);
 		},
 
+		recorderTracks() {
+			return App.Mix.tracks.filter(t=>t.type=='recorder');
+		},
+
 		playing: false,
 
 		isPlaying() {
 			return App.Mix.playing;
+		},
+
+		loadTake(blob, filename) {
+			var t=recorderTracks()[0];
+
 		}
 	},
 
@@ -53,6 +65,8 @@ var App = {
 		if(!App.config || !App.config[key]) return null;
 		return App.config[key];
 	},
+
+	beforeConfig: function() {},
 
 	onload: function() {
 	},
@@ -88,7 +102,14 @@ var App = {
 			// load config
 			jQuery.getJSON( "tracks.json", function( data ) {
 				console.log("track Config loaded: ", data);
-				App.config=data.config || {};
+				// initialize config
+				/*App.config={};
+				App.beforeConfig();
+				for(const property in data.config){
+					App.config[property] = data.config[property];
+				}*/
+				App.config = data.config || {};
+
 				if(data.title)
 					$('#title').html(data.title);
 				if(data.name)

@@ -135,11 +135,11 @@ li {
   outline: none;
   background: #2d1cc7;
 }
-.track button.arm, .track button.monitor {
+.track button.arm, .track button.monitor, .track .offset {
 	display: none;
 }
 
-.track.recorder button.arm, .track.recorder button.monitor {
+.track.recorder button.arm, .track.recorder button.monitor, .track.recorder .offset {
 	display: block;
 }
 .track.armed button.arm {
