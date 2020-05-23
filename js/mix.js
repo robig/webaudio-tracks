@@ -38,7 +38,7 @@ var App = {
 			
 			setTimeout(function() {
 				App.Mix.tracks.filter(t=>t.armed).forEach(t=>t.record(startTime));
-			}, offset);
+			}, offset*1000);
 		},
 
 		armedTracks() {
@@ -58,7 +58,14 @@ var App = {
 		loadTake(blob, filename) {
 			var t=recorderTracks()[0];
 
+		},
+
+		createMeter(elem) {
+			var x = webAudioPeakMeter();
+			var meterNode = x.createMeterNode(App.Mix.merger, App.context);
+			x.createMeter(elem, meterNode, {});
 		}
+
 	},
 
 	getConfig: function(key) {
@@ -88,26 +95,21 @@ var App = {
 	init: function() {
 		var me = this;
 
-		window.onload = function () {
 			try {
 				window.AudioContext = window.AudioContext || window.webkitAudioContext  || window.mozAudioContext || window.msAudioContext;
 				navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 				window.URL = window.URL || window.webkitURL || window.mozURL  || window.msURL;
 				me.context = new window.AudioContext();
 				me.context.createGain = me.context.createGain || me.context.createGainNode;
+				me.context.onstatechange=function() {console.log("AudioContext.stateChange",me.context.state);}
 			} catch (e) {
 				window.alert('Your browser does not support WebAudio, try Google Chrome');
 			}
 
 			// load config
-			jQuery.getJSON( "tracks.json", function( data ) {
+			jQuery.getJSON( "tracks.json?now="+Date.now(), function( data ) {
 				console.log("track Config loaded: ", data);
 				// initialize config
-				/*App.config={};
-				App.beforeConfig();
-				for(const property in data.config){
-					App.config[property] = data.config[property];
-				}*/
 				App.config = data.config || {};
 
 				if(data.title)
@@ -115,14 +117,15 @@ var App = {
 				if(data.name)
 					this.recorderName=data.name;
 				if(data.tracks) {
-					App.Mix.merger = me.context.createChannelMerger(data.tracks.length);
-					data.tracks.filter(t=>t.enabled!==false).forEach(e => App.Mix.tracks.push(new Track(e, me.context, App.Mix.merger, App._eventLoad)));
-					App.Mix.merger.connect(me.context.destination);
+					var enabledTracks= data.tracks.filter(t=>t.enabled!==false);
+					var destination = me.context.destination;
+					App.Mix.merger = me.context.createChannelMerger(enabledTracks.length);
+					enabledTracks.forEach(e => App.Mix.tracks.push(new Track(e, me.context, App.Mix.merger, App._eventLoad)));
+					App.Mix.merger.connect(destination);
 				}
 				App.oninit();
 			}).fail(function(e){console.log("ERROR",e);alert("failed to load tracks")});
-		}
 	}, // end init
 };
 
-App.init();
+//App.init();

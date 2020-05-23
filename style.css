@@ -142,7 +142,7 @@ li {
 .track.recorder button.arm, .track.recorder button.monitor, .track.recorder .offset {
 	display: block;
 }
-.track.armed button.arm {
+.track.armed button.arm, .track.recorder button.monitor.active {
 	background: #ed341d;
 }
 

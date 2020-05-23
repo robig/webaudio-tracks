@@ -9,7 +9,7 @@ App.oninit=function() {
 		
 		function track_arm() {
 			var me=this;
-			t.arm(function() {
+			t.toggleArm(function() {
 				if(t.armed) 
 					$(t.ui).addClass("armed");
 				else
@@ -25,7 +25,9 @@ App.oninit=function() {
 		var mon = clon.querySelector(".monitor");
 		if(t.recordMonitoring) $(mon).addClass('active');
 		mon.addEventListener("click", function() { 
-			t.toggleRecordMonitoring(function(val) { if(val) $(mon).addClass('active'); else $(mon).removeClass('active'); });
+			var val=t.toggleRecordMonitoring();
+			if(val) $(mon).addClass('active');
+			else $(mon).removeClass('active');
 		});
 
 		tracks.appendChild(clon);
@@ -91,6 +93,12 @@ App.onload=function() {
 	.addBinding(document.getElementById("play_offset_value"), "innerHTML");
 };
 
+// because of chrome we need a click first
+$('#Start').click(function(){
+	$('#Welcome').hide(100);
+	$('#App').show(200);
+	App.init();
+});
 
 var recordButton = document.getElementById("recordButton");
 var stopButton = document.getElementById("stopButton");
@@ -236,4 +244,34 @@ function createDownloadLink(blob) {
 	$('#recordingsList').append(li);
 }
 
+// can edit track name
+$('.track.recorder .name').dblclick(function(e) {
+	e.stopPropagation();
+   var currentEle = $(this);
+   var value = $(this).html();
 
+	$(currentEle).html('<input class="thVal" type="text" value="' + value + '" />');
+	$(".thVal").focus();
+	$(".thVal").keyup(function (event) {
+		if (event.keyCode == 13) {
+			var newvalue=$(".thVal").val().trim();
+			console.log("new track name:", newvalue);
+			$(currentEle).html(newValue);
+		}
+	});
+
+	$(document).click(function () { // you can use $('html')
+		$(currentEle).html($(".thVal").val().trim());
+	});
+});
+
+
+$("#roundslider3").roundSlider({
+	radius: 80,
+    circleShape: "half-top",
+    sliderType: "min-range",
+    showTooltip: true,
+    value: 0,
+	min: -50,
+	max: 50
+});

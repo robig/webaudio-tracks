@@ -15,9 +15,19 @@ class Track {
 		this.info=data;
 		this.number=data.number || 1;
 		this.config=data.config || {};
+		this.recordMonitoring = data.monitoring === true;
 
 		this.context=audioContext;
 		this.gainNode = this.context.createGain();
+		this.splitter = this.context.createChannelSplitter(2);
+		this.leftGain = this.context.createGain();
+		this.rightGain = this.context.createGain();
+		this.merger = this.context.createChannelMerger(2);
+		this.gainNode.connect(this.splitter);
+		this.splitter.connect(this.leftGain, 0);
+		this.splitter.connect(this.rightGain, 1);
+		this.leftGain.connect(this.merger, 0, 1);
+		this.rightGain.connect(this.merger, 0, 0);
 		this.destination=connector;
 		
 		/*this.source = this.context.createBufferSource();
@@ -81,7 +91,7 @@ class Track {
 	}
 
 	play(startTime) {
-		if(!this.audioLoaded && this.buffer) return;
+		if(!this.audioLoaded || !this.buffer) return;
 
 		this.source = this.context.createBufferSource();
 		this.source.buffer = this.buffer;
@@ -89,7 +99,7 @@ class Track {
 		// Connect source to a gain node
 		this.source.connect(this.gainNode);
 		// Connect gain node to destination
-		if(this.destination) this.gainNode.connect(this.destination);
+		if(this.destination) this.merger.connect(this.destination);
 		
 		// Start playback in a loop
 		this.source.loop = this.info.loop ? true : false;
@@ -98,8 +108,8 @@ class Track {
 		startTime+=this.playbackOffset;
 		this.startedAt=startTime;
 		console.log("track.play at ", startTime);
-		//this.source[this.source.start ? 'start' : 'noteOn'](0);
-		this.source.start(startTime);
+		this.source[this.source.start ? 'start' : 'noteOn'](startTime);
+		//this.source.start(startTime);
 		this.isPlaying = true;
 	}
 
@@ -136,8 +146,9 @@ class Track {
 
 	createMeter(myMeterElement) {
 		//var myMeterElement = document.getElementById('my-peak-meter');
+		myMeterElement.innerHTML='';
 		var x = webAudioPeakMeter();
-		this.meterNode = x.createMeterNode(this.gainNode, this.context);
+		this.meterNode = x.createMeterNode(this.merger, this.context);
 		x.createMeter(myMeterElement, this.meterNode, {});
 	}
 
@@ -149,13 +160,12 @@ class Track {
 		else me.gainNode.disconnect();
 	}
 
-	toggleRecordMonitoring(callback) {
+	toggleRecordMonitoring() {
 		this.setRecordMonitoring(!this.recordMonitoring);
-		if(callback) callback(this.recordMonitoring);
 		return this.recordMonitoring;
 	}
 
-	arm(callback) {
+	toggleArm(callback) {
 		if(this.armed) {
 			this.armed=false;
 			if(callback) callback(this);
@@ -167,23 +177,34 @@ class Track {
 	armRecorder(callback) {
 		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 		var me=this;
-		if (navigator.getUserMedia) {
+		if(navigator.mediaDevices.getUserMedia) {
+			navigator.mediaDevices.getUserMedia({audio: true, video: false})
+			.then(stream=>me._initRecorder(stream, callback))
+			.catch(e=>window.alert("Could not init microphone"+e)); 
+		} else if (navigator.getUserMedia) {
 			navigator.getUserMedia({audio: true}, function (stream) {
-				me.input = me.context.createMediaStreamSource(stream);
-				me.input.connect(me.gainNode);
-				// Connect gain node to destination
-				if(me.recordMonitoring && me.destination) me.gainNode.connect(me.destination);
-				else me.gainNode.disconnect();
-				me.recorder = new Recorder(me.input);
-				me.armed=true;
-				console.log('track.armed');
-				if(callback) callback(me);
+				me._initRecorder(stream, callback);
 			}, function (e) {
 				window.alert('Please enable your microphone to begin recording');
 			});
 		} else {
 			window.alert('Your browser does not support recording, try Google Chrome');
 		}
+	}
+
+	_initRecorder(stream, callback) {
+		var me=this;
+		me.gumStream=stream;
+		me.input = me.context.createMediaStreamSource(stream);
+		me.input.connect(me.gainNode);
+		// Connect gain node to destination
+		console.log("track.recordMonitoring", me.recordMonitoring);
+		if(me.recordMonitoring && me.destination) me.gainNode.connect(me.destination);
+		else me.gainNode.disconnect();
+		me.recorder = new Recorder(me.input);
+		me.armed=true;
+		console.log('track.armed');
+		if(callback) callback(me);
 	}
 	
 	/**
@@ -217,6 +238,10 @@ class Track {
 			if(callback) callback(me);
 			if(me.onrecord)me.onrecord(me);
 		});
+	}
+
+	freeMic() {
+		this.gumStream.getAudioTracks()[0].stop();
 	}
 
 	getDuration() {

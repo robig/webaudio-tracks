@@ -8,11 +8,22 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<link href="css/all.css" rel="stylesheet"> <!--load all fontawesome styles -->
     <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="css/roundslider.min.css">
 	<script src="js/jquery-3.4.1.min.js"></script>
+	<script src="js/roundslider.min.js"></script>
   </head>
   <body>
     <h1 id="title">Take Recorder</h1>
-    <p><small>Uploads sind hier: <a href="files/" >files/</a></small></p>
+
+	<div id="Welcome">
+		Press Start to begin
+
+		<button id="Start">Start</button>
+	</div>
+
+
+	<div id="App" style="display: none">
+    <p><small>Uploads: <a href="files/" >files/</a></small></p>
 
 	<div id="error_message" class="alert alert-danger" role="alert" style="display:none;">
 	</div>
@@ -25,6 +36,8 @@
 	<input id="rec_offset" class="Offset slider" type="range" min="0" max="500" value="100">
 	<div id="rec_offset_value"></div>
 
+	<div id="roundslider3" class="roundslider"></div>
+
 	<template id="track_tpl">
 		<div class="track">
 			<div class="meter" style="width: 12em; height: 3em;"></div>
@@ -32,7 +45,7 @@
 			<button class="arm" title="Arm (prepare) track for recording">arm</button>
 			<div class="time"></div>
 			<input class="volume slider" type="range" min="0" max="100" value="100">
-			<button class="mini monitor"><i class="fas fa-microphone"></i></button>
+			<button class="mini monitor" title="toggles record monitoring"><i class="fas fa-microphone"></i></button>
 			<div class="name"></div>
 			<input class="offset slider" type="range" min="-100" max="100" value="0">
 		</div>
@@ -50,6 +63,9 @@
   	<p><strong>Takes:</strong></p>
   	<ol id="recordingsList">
 	</ol>
+
+	</div>
+
     <!-- inserting these scripts at the end to be able to use all the elements in the DOM -->
   	<script src="js/binding.js"></script>
   	<script src="js/recorder.js"></script>
