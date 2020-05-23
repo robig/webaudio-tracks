@@ -1,0 +1,31 @@
+<body>
+		<script type="text/javascript">
+		window.AudioContext = window.AudioContext || window.webkitAudioContext  || window.mozAudioContext || window.msAudioContext;
+		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+		window.URL = window.URL || window.webkitURL || window.mozURL  || window.msURL;
+		var context = new window.AudioContext(),
+		destination = context.destination,
+		osc = context.createOscillator(),
+		gainL = context.createGain(),
+		gainR = context.createGain(),
+		splitter = context.createChannelSplitter(2),
+		merger = context.createChannelMerger(2);
+
+		osc.frequency.value = 500;
+        
+		osc.connect(gainL);
+		osc.connect(gainR);
+
+		gainL.connect(merger, 0, 0);
+		gainR.connect(merger, 0, 1);
+
+		osc.start(0);
+
+		gainL.gain.value = 0.1;
+		gainR.gain.value = 0.9;
+
+		osc.stop(2);
+
+		merger.connect(destination);
+	</script>
+</body>
