@@ -92,7 +92,9 @@ var App = {
 		}
 	},
 
-	init: function() {
+	init: function(file) {
+		if(!file) file="tracks.json";
+		this.sessionName=file.replace(/\.[^/.]+$/, "");
 		var me = this;
 
 			try {
@@ -107,7 +109,7 @@ var App = {
 			}
 
 			// load config
-			jQuery.getJSON( "tracks.json?now="+Date.now(), function( data ) {
+			jQuery.getJSON( file+"?now="+Date.now(), function( data ) {
 				console.log("track Config loaded: ", data);
 				// initialize config
 				App.config = data.config || {};
@@ -115,7 +117,7 @@ var App = {
 				if(data.title)
 					$('#title').html(data.title);
 				if(data.name)
-					this.recorderName=data.name;
+					this.sessionName=data.name;
 				if(data.tracks) {
 					var enabledTracks= data.tracks.filter(t=>t.enabled!==false);
 					var destination = me.context.destination;

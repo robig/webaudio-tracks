@@ -5,13 +5,13 @@
 		{ "src": "90.mp3", "name": "jacaranda_and_Drum", "enabled": false },
 		{ "src": "click_90bpm.mp3","name": "Click Test 90bpm", "loop": true, "enabled": false },
 		{ "src": "tamborine_90bpm.mp3","name": "Test 90bpm", "loop": true, "enabled": false },
-		{ "name": "Record here", "monitoring": false }
+		{ "name": "Record here", "monitoring": false, "config": {"offset": -81} }
 	],
 	"config": { 
 		"playbackOffset": 355,
-		"recordOffset": 5,
-		"noautoArm": true,
-		"noshowMasterTrack": true,
+		"recordOffset": 355,
+		"autoArm": true,
+		"showMasterTrack": true,
 		"enablePan": true,
 		"enableTrackNaming": true
 	}

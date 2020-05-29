@@ -36,9 +36,16 @@ App.oninit=function() {
 
 		t.onrecord=recordingdone;
 
-		if(t.type=='recorder' && App.config.autoArm==true)
-		{
-			track_arm();
+		if(t.type=='recorder') {
+			if(App.config.autoArm==true) track_arm();
+			var offEl=$(t.ui).find('.offset .slider')[0];
+			var offVal=$(t.ui).find('.offset .value')[0];
+			new Binding({
+				object: t,
+				property: "playbackOffset"
+			})
+			.addBinding(offEl, "value", "change")
+			.addBinding(offVal, "innerHTML");
 		}
 		if(App.config.enablePan)
 			$(t.ui).find(".roundslider").roundSlider({
@@ -154,7 +161,8 @@ App.onload=function() {
 $('#Start').click(function(){
 	$('#Welcome').hide(100);
 	$('#App').show(200);
-	App.init();
+	var session=$('#session').val();
+	App.init(session);
 });
 
 var recordButton = document.getElementById("recordButton");
@@ -233,8 +241,9 @@ function upload(blob, filename, callback) {
 }
 var debug=null;
 function createDownloadLink(blob) {
-	var uploadDirectly=true;
-	var recorderName="test";
+	var uploadDirectly=App.config.uploadDirectly || true;
+	var session=App.sessionName ? App.sessionName+'_' :  '';
+	var name=App.recorderName || 'test';
 
 	var url = URL.createObjectURL(blob);
 	var au = document.createElement('audio');
@@ -242,7 +251,7 @@ function createDownloadLink(blob) {
 	var link = document.createElement('a');
 
 	//name of .wav file to use during upload and download (without extendion)
-	var filename = new Date().toISOString()+"_"+recorderName;
+	var filename = session+new Date().toISOString()+"_"+name;
 
 	//add controls to the <audio> element
 	au.controls = true;
@@ -313,18 +322,3 @@ $(window).keypress(function (e) {
   }
 })
 
-
-/*$("#roundslider1").roundSlider({
-	radius: 80,
-    circleShape: "half-top",
-    sliderType: "min-range",
-    showTooltip: true,
-    value: 0,
-	min: -50,
-	max: 50,
-	update: function(ev) {
-		var val=ev.value/100;
-		console.log("Pan", val);
-		App.Mix.tracks[0].setPan(val);
-	}
-});*/

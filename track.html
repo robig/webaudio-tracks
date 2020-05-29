@@ -16,9 +16,12 @@
     <h1 id="title">Take Recorder</h1>
 
 	<div id="Welcome">
-		Press Start to begin
-
+		<select id="session">
+			<option value="tracks.json" selected>90bpm stereo</option>
+			<option value="billy_jean.json">Billy Jean</option>
+		</select>
 		<button id="Start">Start</button>
+		Choose session ans Press Start to begin.
 	</div>
 
 
@@ -26,7 +29,7 @@
     <p><small>Uploads: <a href="files/" >files/</a></small></p>
 
 	<div id="error_message" class="alert alert-danger" role="alert" style="display:none;"></div>
-	<div id="ok_message" class="alert alert-danger" role="alert" style="display:none;"></div>
+	<div id="ok_message" class="alert alert-success" role="alert" style="display:none;"></div>
 
 	Playback Offset:
 	<input id="play_offset" class="Offset slider" type="range" min="0" max="500" value="100">
@@ -48,7 +51,7 @@
 			<input class="volume slider" type="range" min="0" max="100" value="100">
 			<button class="mini monitor" title="toggles record monitoring"><i class="fas fa-microphone"></i></button>
 			<div class="name"></div>
-			<input class="offset slider" type="range" min="-100" max="100" value="0">
+			<div class="offset"><input class="slider" type="range" min="-400" max="400" value="0"><div class="value"></div></div>
 		</div>
 	</template>
 	<div id="tracks">

@@ -17,6 +17,7 @@ class Track {
 		this.number=data.number || 1;
 		this.config=data.config || {};
 		this.recordMonitoring = data.monitoring === true;
+		if(this.config.offset) this.playbackOffset=this.config.offset;
 
 		this.context=audioContext;
 		this.gainNode = this.context.createGain();
@@ -110,7 +111,7 @@ class Track {
 		this.source.loop = this.info.loop ? true : false;
 
 		if(startTime===null) startTime=this.context.currentTime;
-		startTime+=this.playbackOffset;
+		startTime+=(this.playbackOffset/1000);
 		this.startedAt=startTime;
 		console.log("track.play at ", startTime);
 		this.source[this.source.start ? 'start' : 'noteOn'](startTime);
@@ -218,7 +219,10 @@ class Track {
 		console.log("track.recordMonitoring", me.recordMonitoring);
 
 		if(me.recordMonitoring && me.destination) me.getOutputNode().connect(me.destination);
-		else me.getOutputNode().disconnect();
+		else {
+			me.getOutputNode().disconnect(); //disconnects all
+			if(me.meterNode) me.getOutputNode().connect(me.meterNode);
+		}
 		me.recorder = new Recorder(me.input);
 		me.armed=true;
 		console.log('track.armed');
@@ -234,7 +238,6 @@ class Track {
 		this.targetStartTime=startTime || this.context.currentTime;
 		this.recorder.clear();
 		this.recording=true;
-		//quatsch this.recorder.startTime = this.context.currentTime;
 		this.recorder.record();
 		this.startedAt = this.recorder.startTime || this.context.currentTime;
 		return {sampleRate: this.context.sampleRate, startTime: this.recorder.startTime};
@@ -252,7 +255,7 @@ class Track {
 			me.recording=false;
 			me.audioLoaded=true;
 			var recOffset = me._calcOffset(me.buffer, me.targetStartTime, me.config.recordOffset || 0);
-			me.playbackOffset = recOffset.offset;
+			me.recordingOffset = recOffset.offset * 1000;
 			if(callback) callback(me);
 			if(me.onrecord)me.onrecord(me);
 		});
