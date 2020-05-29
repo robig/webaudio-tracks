@@ -68,6 +68,9 @@ button {
 button#playButton {
 	background: #34ed1d;
 }
+button#playButton:hover {
+	background: #24cd1d;
+}
 
 button:hover, button:focus {
   outline: none;
@@ -145,6 +148,9 @@ li {
 .track.armed button.arm, .track.recorder button.monitor.active {
 	background: #ed341d;
 }
+.track.armed button.arm:hover, .track.recorder button.monitor.active:hover {
+	background: #c72d1c;
+}
 .track.master {
 	margin-top: 15px;
 	background: #161232;
@@ -213,4 +219,8 @@ button.mini {
   border-radius: 50%;
   background: #4CAF50;
   cursor: pointer;
+}
+
+.roundslider {
+	float: left;
 }

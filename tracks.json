@@ -11,6 +11,8 @@
 		"playbackOffset": 355,
 		"recordOffset": 5,
 		"noautoArm": true,
-		"showMasterTrack": true
+		"noshowMasterTrack": true,
+		"enablePan": true,
+		"enableTrackNaming": true
 	}
 }

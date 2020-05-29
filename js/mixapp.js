@@ -40,21 +40,39 @@ App.oninit=function() {
 		{
 			track_arm();
 		}
+		if(App.config.enablePan)
+			$(t.ui).find(".roundslider").roundSlider({
+				radius: 40,
+				circleShape: "half-top",
+				sliderType: "min-range",
+				showTooltip: true,
+				value: 0,
+				min: -50,
+				max: 50,
+				update: function(ev) {
+					var val=ev.value/100;
+					console.log("Pan", val);
+					t.setPan(val);
+				}
+			});
 	});
 
-	var master = document.getElementById('master');
-	var t = App.Mix.master;
-	var clon = trackTemplate.content.cloneNode(true);
-	clon.querySelector(".name").innerText=t.info.name;
-	var vol=clon.querySelector(".volume");
-	vol.addEventListener("change", function() {t.changeVolume(this);});
-	clon.querySelector(".mute").addEventListener("click", function() { t.mute(); vol.value=t.getVolume()*100;});
-	master.appendChild(clon);
-	t.ui=master.children[0];
-	$(t.ui).addClass(t.type);
-	var meter = t.ui.querySelector(".meter");
-	meter.innerText="";
-	t.createMeter(meter);
+	// show master track
+	if(App.config.showMasterTrack === true) {
+		var master = document.getElementById('master');
+		var t = App.Mix.master;
+		var clon = trackTemplate.content.cloneNode(true);
+		clon.querySelector(".name").innerText=t.info.name;
+		var vol=clon.querySelector(".volume");
+		vol.addEventListener("change", function() {t.changeVolume(this);});
+		clon.querySelector(".mute").addEventListener("click", function() { t.mute(); vol.value=t.getVolume()*100;});
+		master.appendChild(clon);
+		t.ui=master.children[0];
+		$(t.ui).addClass(t.type);
+		var meter = t.ui.querySelector(".meter");
+		meter.innerText="";
+		t.createMeter(meter);
+	}
 
 
 	// can edit track name
@@ -296,7 +314,7 @@ $(window).keypress(function (e) {
 })
 
 
-$("#roundslider1").roundSlider({
+/*$("#roundslider1").roundSlider({
 	radius: 80,
     circleShape: "half-top",
     sliderType: "min-range",
@@ -309,4 +327,4 @@ $("#roundslider1").roundSlider({
 		console.log("Pan", val);
 		App.Mix.tracks[0].setPan(val);
 	}
-});
+});*/
