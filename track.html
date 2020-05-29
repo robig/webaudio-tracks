@@ -25,8 +25,8 @@
 	<div id="App" style="display: none">
     <p><small>Uploads: <a href="files/" >files/</a></small></p>
 
-	<div id="error_message" class="alert alert-danger" role="alert" style="display:none;">
-	</div>
+	<div id="error_message" class="alert alert-danger" role="alert" style="display:none;"></div>
+	<div id="ok_message" class="alert alert-danger" role="alert" style="display:none;"></div>
 
 	Playback Offset:
 	<input id="play_offset" class="Offset slider" type="range" min="0" max="500" value="100">
@@ -36,7 +36,7 @@
 	<input id="rec_offset" class="Offset slider" type="range" min="0" max="500" value="100">
 	<div id="rec_offset_value"></div>
 
-	<div id="roundslider3" class="roundslider"></div>
+	<div id="roundslider1" class="roundslider"></div>
 
 	<template id="track_tpl">
 		<div class="track">
@@ -59,6 +59,7 @@
   	 <button id="pauseButton" disabled>Pause</button>
   	 <button id="stopButton" disabled>Stop</button>
     </div>
+    <div id="master"></div>
     <div id="info"></div>
   	<p><strong>Takes:</strong></p>
   	<ol id="recordingsList">

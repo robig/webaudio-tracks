@@ -119,9 +119,11 @@ var App = {
 				if(data.tracks) {
 					var enabledTracks= data.tracks.filter(t=>t.enabled!==false);
 					var destination = me.context.destination;
-					App.Mix.merger = me.context.createChannelMerger(enabledTracks.length);
-					enabledTracks.forEach(e => App.Mix.tracks.push(new Track(e, me.context, App.Mix.merger, App._eventLoad)));
-					App.Mix.merger.connect(destination);
+					//App.Mix.merger = me.context.createChannelMerger(enabledTracks.length);
+					App.Mix.master = new Track({master: true, name: "Master"}, me.context, destination, null);
+					enabledTracks.forEach(e => App.Mix.tracks.push(new Track(e, me.context, App.Mix.master.gainNode, App._eventLoad)));
+					//App.Mix.merger.connect(App.Mix.master.gainNode);
+					App.Mix.master.getOutputNode().connect(destination);
 				}
 				App.oninit();
 			}).fail(function(e){console.log("ERROR",e);alert("failed to load tracks")});

@@ -1,7 +1,8 @@
 {
 	"title": "test 90bpm",
 	"tracks": [
-		{ "src": "90.mp3", "name": "jacaranda_and_Drum", "enabled": true },
+		{ "src": "90bpm_stereo.wav", "name": "90bpm Stereo", "loop": true, "enabled": true },
+		{ "src": "90.mp3", "name": "jacaranda_and_Drum", "enabled": false },
 		{ "src": "click_90bpm.mp3","name": "Click Test 90bpm", "loop": true, "enabled": false },
 		{ "src": "tamborine_90bpm.mp3","name": "Test 90bpm", "loop": true, "enabled": false },
 		{ "name": "Record here", "monitoring": false }
@@ -9,6 +10,7 @@
 	"config": { 
 		"playbackOffset": 355,
 		"recordOffset": 5,
-		"noautoArm": true
+		"noautoArm": true,
+		"showMasterTrack": true
 	}
 }

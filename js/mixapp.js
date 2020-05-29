@@ -41,6 +41,45 @@ App.oninit=function() {
 			track_arm();
 		}
 	});
+
+	var master = document.getElementById('master');
+	var t = App.Mix.master;
+	var clon = trackTemplate.content.cloneNode(true);
+	clon.querySelector(".name").innerText=t.info.name;
+	var vol=clon.querySelector(".volume");
+	vol.addEventListener("change", function() {t.changeVolume(this);});
+	clon.querySelector(".mute").addEventListener("click", function() { t.mute(); vol.value=t.getVolume()*100;});
+	master.appendChild(clon);
+	t.ui=master.children[0];
+	$(t.ui).addClass(t.type);
+	var meter = t.ui.querySelector(".meter");
+	meter.innerText="";
+	t.createMeter(meter);
+
+
+	// can edit track name
+	$('.track.recorder .name').dblclick(function(e) {
+		e.stopPropagation();
+		var currentEle = $(this);
+		var value = $(this).html();
+		currentEle.attr("editting", "true");
+
+		$(currentEle).html('<input class="thVal" type="text" value="' + value + '" />');
+		$(".thVal").focus();
+		$(".thVal").keyup(function (event) {
+			if (event.keyCode == 13) {
+				var newvalue=$(".thVal").val().trim();
+				console.log("new track name:", newvalue);
+				$(currentEle).html(newvalue);
+			}
+		});
+
+		$(document).click(function () { // you can use $('html')
+			if($(currentEle).attr("editing")=="true")
+				$(currentEle).html($(".thVal").val().trim());
+		});
+	});
+
 };
 
 // update some GUI elements every second
@@ -66,7 +105,7 @@ function recordingdone(t) {
 
 App.onload=function() {
 	App.Mix.tracks.forEach(function(t) {
-		console.log("mixapp.onload", t.name);
+		console.log("mixapp.onload", t.info.name);
 		var meter = t.ui.querySelector(".meter");
 		meter.innerText="";
 		t.createMeter(meter);
@@ -244,34 +283,30 @@ function createDownloadLink(blob) {
 	$('#recordingsList').append(li);
 }
 
-// can edit track name
-$('.track.recorder .name').dblclick(function(e) {
-	e.stopPropagation();
-   var currentEle = $(this);
-   var value = $(this).html();
-
-	$(currentEle).html('<input class="thVal" type="text" value="' + value + '" />');
-	$(".thVal").focus();
-	$(".thVal").keyup(function (event) {
-		if (event.keyCode == 13) {
-			var newvalue=$(".thVal").val().trim();
-			console.log("new track name:", newvalue);
-			$(currentEle).html(newValue);
-		}
-	});
-
-	$(document).click(function () { // you can use $('html')
-		$(currentEle).html($(".thVal").val().trim());
-	});
-});
+// Register global keyboard shortcuts:
+$(window).keypress(function (e) {
+  if (e.key === ' ' || e.key === 'Spacebar') {
+    // ' ' is standard, 'Spacebar' was used by IE9 and Firefox < 37
+    e.preventDefault()
+    console.log('Space pressed');
+	if(!App.Mix.isPlaying()) {
+		playPressed();
+	} else stopPressed();
+  }
+})
 
 
-$("#roundslider3").roundSlider({
+$("#roundslider1").roundSlider({
 	radius: 80,
     circleShape: "half-top",
     sliderType: "min-range",
     showTooltip: true,
     value: 0,
 	min: -50,
-	max: 50
+	max: 50,
+	update: function(ev) {
+		var val=ev.value/100;
+		console.log("Pan", val);
+		App.Mix.tracks[0].setPan(val);
+	}
 });

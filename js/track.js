@@ -12,6 +12,7 @@ class Track {
 		this.muteVol=1;
 		this.playbackOffset=0;
 
+
 		this.info=data;
 		this.number=data.number || 1;
 		this.config=data.config || {};
@@ -19,7 +20,14 @@ class Track {
 
 		this.context=audioContext;
 		this.gainNode = this.context.createGain();
-		this.splitter = this.context.createChannelSplitter(2);
+
+		// not supported on iOS Safari :(
+		this.enablePan = this.context.createStereoPanner ? true : false;
+		if(this.enablePan) {
+			this.panNode = this.context.createStereoPanner();
+			this.gainNode.connect(this.panNode);
+		}
+		/*this.splitter = this.context.createChannelSplitter(2);
 		this.leftGain = this.context.createGain();
 		this.rightGain = this.context.createGain();
 		this.merger = this.context.createChannelMerger(2);
@@ -27,16 +35,10 @@ class Track {
 		this.splitter.connect(this.leftGain, 0);
 		this.splitter.connect(this.rightGain, 1);
 		this.leftGain.connect(this.merger, 0, 1);
-		this.rightGain.connect(this.merger, 0, 0);
+		this.rightGain.connect(this.merger, 0, 0);*/
+
 		this.destination=connector;
 		
-		/*this.source = this.context.createBufferSource();
-		//this.source.buffer = this.buffer;
-		// Connect source to a gain node
-		this.source.connect(this.gainNode);
-		// Connect gain node to destination
-		if(this.destination) this.gainNode.connect(this.destination);*/
-
 		// Start playback in a loop
 		//this.source.loop = this.info.loop ? true : false;
 
@@ -44,8 +46,11 @@ class Track {
 			this.load(this.info.src, loadcallback);
 			this.type="audio";
 		}
-		else
-		{
+		else if(this.info.master===true) {
+			this.ready=true;
+			this.type="master";
+		}
+		else {
 			this.ready=true;
 			this.type="recorder";
 		}
@@ -99,7 +104,7 @@ class Track {
 		// Connect source to a gain node
 		this.source.connect(this.gainNode);
 		// Connect gain node to destination
-		if(this.destination) this.merger.connect(this.destination);
+		if(this.destination) this.getOutputNode().connect(this.destination);
 		
 		// Start playback in a loop
 		this.source.loop = this.info.loop ? true : false;
@@ -148,16 +153,27 @@ class Track {
 		//var myMeterElement = document.getElementById('my-peak-meter');
 		myMeterElement.innerHTML='';
 		var x = webAudioPeakMeter();
-		this.meterNode = x.createMeterNode(this.merger, this.context);
+		this.meterNode = x.createMeterNode(this.getOutputNode(), this.context);
 		x.createMeter(myMeterElement, this.meterNode, {});
+	}
+
+	getOutputNode() {
+		return this.enablePan ? this.panNode : this.gainNode;
+	}
+
+	setPan(val) {
+		if(val<-1 || val >1) return;
+		if(!this.panNode) return;
+		this.panNode.pan.value = val;
 	}
 
 	setRecordMonitoring(val) {
 		var me = this;
 		this.recordMonitoring=val;
 		console.log("track.recordMonitoring:", val);
-		if(this.recordMonitoring) me.gainNode.connect(me.destination);
-		else me.gainNode.disconnect();
+		var node=this.enablePan ? me.panNode : me.gainNode;
+		if(this.recordMonitoring) node.connect(me.destination);
+		else node.disconnect();
 	}
 
 	toggleRecordMonitoring() {
@@ -168,6 +184,7 @@ class Track {
 	toggleArm(callback) {
 		if(this.armed) {
 			this.armed=false;
+			this.freeMic();
 			if(callback) callback(this);
 			return;
 		}
@@ -199,8 +216,9 @@ class Track {
 		me.input.connect(me.gainNode);
 		// Connect gain node to destination
 		console.log("track.recordMonitoring", me.recordMonitoring);
-		if(me.recordMonitoring && me.destination) me.gainNode.connect(me.destination);
-		else me.gainNode.disconnect();
+
+		if(me.recordMonitoring && me.destination) me.getOutputNode().connect(me.destination);
+		else me.getOutputNode().disconnect();
 		me.recorder = new Recorder(me.input);
 		me.armed=true;
 		console.log('track.armed');

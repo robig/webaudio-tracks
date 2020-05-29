@@ -145,6 +145,13 @@ li {
 .track.armed button.arm, .track.recorder button.monitor.active {
 	background: #ed341d;
 }
+.track.master {
+	margin-top: 15px;
+	background: #161232;
+}
+.track.master .name {
+	color: #fff;
+}
 
 button.mini {
 	font-size: xx-small;
