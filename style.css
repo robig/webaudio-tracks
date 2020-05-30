@@ -129,6 +129,11 @@ li {
 	float: left;
 }
 
+.track .time {
+	font-family: courier;
+	font-weight: bold;
+}
+
 .track button {
 	background: blue;
 	float: right;

@@ -43,6 +43,10 @@
       }
     }
 
+    this.getBufferLen = function() {
+		return bufferLen;
+	}
+
 	this.getStartTime = function() {
 		return startTime;
 	}

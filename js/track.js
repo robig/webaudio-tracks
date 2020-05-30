@@ -223,7 +223,7 @@ class Track {
 			me.getOutputNode().disconnect(); //disconnects all
 			if(me.meterNode) me.getOutputNode().connect(me.meterNode);
 		}
-		me.recorder = new Recorder(me.input);
+		me.recorder = new Recorder(me.input, {bufferLen: 2048});
 		me.armed=true;
 		console.log('track.armed');
 		if(callback) callback(me);
@@ -290,8 +290,10 @@ class Track {
 	 */
 	_calcOffset (recording, targetStartTime, offset) {
 		if(!offset) offset=0;
+		var bufferOffset = 1/this.context.sampleRate * this.recorder.getBufferLen();
 		console.log("track.recorder.startTime:", this.recorder.getStartTime());
 		console.log("track.recordOffset:", offset);
+		console.log("track.bufferOffset:", bufferOffset);
 		console.log("track.targetStartTime:", targetStartTime);
 		var diff = (this.recorder.getStartTime() + (offset / 1000)) - targetStartTime;
 		console.log('track.getOffset', diff);

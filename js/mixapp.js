@@ -62,6 +62,37 @@ App.oninit=function() {
 					t.setPan(val);
 				}
 			});
+		// can edit recorder track name
+		if(t.type=='recorder') {
+			$(t.ui).find('.name').dblclick(function(e) {
+				e.stopPropagation();
+				var currentEle = $(this);
+				var value = $(this).html();
+				currentEle.attr("editting", "true");
+
+				$(currentEle).html('<input class="thVal" type="text" value="' + value + '" />');
+				$(".thVal").focus();
+
+				var updateFunc = function() {
+					var newvalue=$(".thVal").val().trim();
+					console.log("new track name:", newvalue);
+					$(currentEle).html(newvalue);
+					t.info.name=newvalue;
+				};
+
+				$(".thVal").keyup(function (event) {
+					if (event.keyCode == 13) {
+						updateFunc();
+					}
+				});
+
+				$(document).click(function () { // you can use $('html')
+					if($(currentEle).attr("editing")=="true"){
+						updateFunc();
+					}
+				});
+			});
+		}
 	});
 
 	// show master track
@@ -82,28 +113,6 @@ App.oninit=function() {
 	}
 
 
-	// can edit track name
-	$('.track.recorder .name').dblclick(function(e) {
-		e.stopPropagation();
-		var currentEle = $(this);
-		var value = $(this).html();
-		currentEle.attr("editting", "true");
-
-		$(currentEle).html('<input class="thVal" type="text" value="' + value + '" />');
-		$(".thVal").focus();
-		$(".thVal").keyup(function (event) {
-			if (event.keyCode == 13) {
-				var newvalue=$(".thVal").val().trim();
-				console.log("new track name:", newvalue);
-				$(currentEle).html(newvalue);
-			}
-		});
-
-		$(document).click(function () { // you can use $('html')
-			if($(currentEle).attr("editing")=="true")
-				$(currentEle).html($(".thVal").val().trim());
-		});
-	});
 
 };
 
@@ -125,6 +134,7 @@ function recordingdone(t) {
 	console.log("Recording finished", t.info.name);
 	t.ui.querySelector('.time').innerText=t.getDuration()+"s";
 
+	App.recorderName = t.info.name;
 	t.recorder.exportWAV(createDownloadLink);
 }
 
@@ -274,7 +284,7 @@ function createDownloadLink(blob) {
 	//upload link
 	var uploadEl = document.createElement('a');
 	uploadEl.href="#";
-	uploadEl.innerHTML = "Upload";
+	uploadEl.innerHTML = _("Upload");
 	uploadEl.addEventListener("click", function(event){
 		upload(blob, filename, function() { $(upload).hide(); } );
 	});
@@ -288,7 +298,7 @@ function createDownloadLink(blob) {
 
 	var del = document.createElement("a");
 	del.href="#";
-	del.innerHTML="Löschen";
+	del.innerHTML=_("delete");
 	del.addEventListener("click", function(event){
 		$(event.srcElement).closest('li').remove();
 	});
@@ -298,7 +308,7 @@ function createDownloadLink(blob) {
 	debug = blob;
 	var play = document.createElement("a");
 	play.href="#";
-	play.innerHTML="Load Take";
+	play.innerHTML=_("Load Take");
 	play.addEventListener("click", function(event){
 		if(stopButton.disabled==false) stopPressed();
 		App.Mix.loadTake(blob, filename);
@@ -314,7 +324,8 @@ function createDownloadLink(blob) {
 $(window).keypress(function (e) {
   if (e.key === ' ' || e.key === 'Spacebar') {
     // ' ' is standard, 'Spacebar' was used by IE9 and Firefox < 37
-    e.preventDefault()
+	if($('.thVal')) return; // currently editting a track
+    e.preventDefault();
     console.log('Space pressed');
 	if(!App.Mix.isPlaying()) {
 		playPressed();
