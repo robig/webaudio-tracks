@@ -36,9 +36,9 @@ var App = {
 			console.log("Que playback start at: +", offset, startTime);
 			App.Mix.tracks.filter(t=>!t.armed).forEach(t=>t.play(startTime));
 			
-			setTimeout(function() {
-				App.Mix.tracks.filter(t=>t.armed).forEach(t=>t.record(startTime));
-			}, offset*1000);
+
+			console.log("Que record start at: +", offset, startTime);
+			App.Mix.tracks.filter(t=>t.armed).forEach(t=>t.record(startTime));
 		},
 
 		armedTracks() {

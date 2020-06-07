@@ -3,11 +3,12 @@
 	"tracks": [
 		{ "src": "click_90bpm.mp3","name": "Click Test 90bpm", "loop": true, "enabled": true },
 		{ "src": "tamborine_90bpm.mp3","name": "Test 90bpm", "loop": true, "enabled": true },
-		{ "name": "Record here", "monitoring": false, "config": {"offset": -81} }
+		{ "name": "Record here", "monitoring": false, "config": {"Nooffset": -81} }
 	],
 	"config": { 
 		"playbackOffset": 355,
 		"recordOffset": 355,
+		"adjustPlaybackOffset": true,
 		"autoArm": false,
 		"showMasterTrack": true,
 		"enablePan": true,

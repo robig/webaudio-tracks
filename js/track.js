@@ -12,12 +12,15 @@ class Track {
 		this.muteVol=1;
 		this.playbackOffset=0;
 
-
 		this.info=data;
 		this.number=data.number || 1;
 		this.config=data.config || {};
 		this.recordMonitoring = data.monitoring === true;
-		if(this.config.offset) this.playbackOffset=this.config.offset;
+		this.adjustPlaybackOffset = data.adjustPlaybackOffset === true;
+		if(this.config.offset) {
+			this.playbackOffset=this.config.offset;
+			this.adjustPlaybackOffset=false; //override default
+		}
 
 		this.context=audioContext;
 		this.gainNode = this.context.createGain();
@@ -85,7 +88,7 @@ class Track {
 	}
 
 	setLoop(l) {
-		this.soucrce.loop=l;
+		this.info.loop=l;
 	}
 
 	setVolume(vol) {
@@ -102,9 +105,13 @@ class Track {
 		this.source = this.context.createBufferSource();
 		this.source.buffer = this.buffer;
 
+		if(!this.recordMonitoring && this.armed && this.input) {
+			try { this.input.disconnect(this.gainNode); } catch(e) {}
+		}
+
 		// Connect source to a gain node
 		this.source.connect(this.gainNode);
-		// Connect gain node to destination
+		// Connect output node to destination
 		if(this.destination) this.getOutputNode().connect(this.destination);
 		
 		// Start playback in a loop
@@ -236,12 +243,30 @@ class Track {
 		if(!this.armed) return;
 		console.log('track.record', this.context.currentTime);
 		this.targetStartTime=startTime || this.context.currentTime;
+		var bufferOffset = 1/this.context.sampleRate * this.recorder.getBufferLen();
+		var offset = this.targetStartTime - this.context.currentTime;// - bufferOffset;
+		console.log('bufferOffset=',bufferOffset);
+		console.log('track.record.offset=', offset);
+		this.startedAt = this.context.currentTime;
+		var me=this;
+
+		// maybe we need to reconnect the input
+		me.input.connect(me.gainNode);
+
+		// wait for the targetted startTime
+		setTimeout(function() {
+			me._recordNow();
+		}, offset*1000);
+		return {sampleRate: this.context.sampleRate, startTime: this.targetStartTime};
+	}
+
+	_recordNow(me) {
+		console.log("track.recording", this.context.currentTime);
 		this.recorder.clear();
 		this.recording=true;
 		this.recorder.record();
-		this.startedAt = this.recorder.startTime || this.context.currentTime;
-		return {sampleRate: this.context.sampleRate, startTime: this.recorder.startTime};
 	}
+
 	/**
 	 * @method recordStop
 	 */
@@ -256,6 +281,10 @@ class Track {
 			me.audioLoaded=true;
 			var recOffset = me._calcOffset(me.buffer, me.targetStartTime, me.config.recordOffset || 0);
 			me.recordingOffset = recOffset.offset * 1000;
+
+			if(me.adjustPlaybackOffset)
+				me.playbackOffset=me.recordingOffset;
+
 			if(callback) callback(me);
 			if(me.onrecord)me.onrecord(me);
 		});

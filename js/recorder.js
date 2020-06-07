@@ -1,12 +1,13 @@
 (function(window){
 
-  var WORKER_PATH = 'recorderWorker.js';
+  var WORKER_PATH = 'js/recorderWorker.js';
 
   var Recorder = function(source, cfg){
     var config = cfg || {};
     var bufferLen = config.bufferLen || 8192; //4096
     var numChannels = config.numChannels || 2;
     this.context = source.context;
+	console.log("Recorder init. bufferLen=", bufferLen);  
     this.node = (this.context.createScriptProcessor ||
                  this.context.createJavaScriptNode).call(this.context,
                  bufferLen, numChannels, numChannels);
@@ -23,8 +24,14 @@
 	  startTime=0;
 
     this.node.onaudioprocess = function(e){
+		//console.log("onaudioprocess", this.context.currentTime, e);
       if (!recording) return;
-	  if(!startTime) {startTime=this.context.currentTime;console.log("onaudioprocess", startTime);}
+	  if(!startTime) {
+		  var currentTime=this.context.currentTime;
+		  var bufferOffset=e.playbackTime-currentTime;
+		  startTime=currentTime-bufferOffset;
+		  console.log("onaudioprocess currentTime=", currentTime, "playbackTime=", e.playbackTime, "startTime=", startTime);
+	  }
       var buffer = [];
       for (var channel = 0; channel < numChannels; channel++){
           buffer.push(e.inputBuffer.getChannelData(channel));
