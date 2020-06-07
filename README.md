@@ -37,12 +37,12 @@ Example:
 * in `tracks` you have to setup each track:
     * `name` the name of the track
     * `src` defines the track audio source, will also used to decide if this track is able to record
-*** all tracks without `src` will become recorder-tracks.
+          * all tracks without `src` will become recorder-tracks.
     * `loop` enables track looping
     * `enable` disabled tracks (`"enable": false`) will be ignored and hidden
     * for recorder tracks you can also define:
-        * `monitoring` enables input monitoring. (!) Caution! you can easily create feedback on laptops when not using headphones!
-        * `config.offset` currently this is the way to setup a fixed playback offset
+          * `monitoring` enables input monitoring. (!) Caution! you can easily create feedback on laptops when not using headphones!
+          * `config.offset` currently this is the way to setup a fixed playback offset
 * the fowwowing `config` options can be used:
     * `playbackOffset` to enable synced playback you have to set an offset >=0 (in ms)
     * `recordOffset` can be tweeked to fix issues with buffering
