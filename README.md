@@ -35,21 +35,21 @@ Example:
 *Explanation:*
 * `title` defines the session title
 * in `tracks` you have to setup each track:
-** `name` the name of the track
-** `src` defines the track audio source, will also used to decide if this track is able to record
+    * `name` the name of the track
+    * `src` defines the track audio source, will also used to decide if this track is able to record
 *** all tracks without `src` will become recorder-tracks.
-** `loop` enabled track looping
-** `enable` disabled tracks (`"enable": false`) will be ignored and hidden
-** for recorder tracks you can also define:
-*** `monitoring` enables input monitoring. (!) Caution! you can easily create feedback on laptops when not using headphones!
-*** `config.offset` currently this is the way to setup a fixed playback offset
+    * `loop` enables track looping
+    * `enable` disabled tracks (`"enable": false`) will be ignored and hidden
+    * for recorder tracks you can also define:
+        * `monitoring` enables input monitoring. (!) Caution! you can easily create feedback on laptops when not using headphones!
+        * `config.offset` currently this is the way to setup a fixed playback offset
 * the fowwowing `config` options can be used:
-** `playbackOffset` to enable synced playback you have to set an offset >=0 (in ms)
-** `recordOffset` can be tweeked to fix issues with buffering
-** `autoArm` can be enabled to automatially arm a all recorder - tracks on project load
-** `showMasterTrack` should the master-track be shown?
-** `enablePan` show pan slider? Note: panning is not supported in iOS
-** `enableTrackNaming` when enabled a double-click on a recorder-track name can be used to change the name
+    * `playbackOffset` to enable synced playback you have to set an offset >=0 (in ms)
+    * `recordOffset` can be tweeked to fix issues with buffering
+    * `autoArm` can be enabled to automatially arm a all recorder - tracks on project load
+    * `showMasterTrack` should the master-track be shown?
+    * `enablePan` show pan slider? Note: panning is not supported in iOS
+    * `enableTrackNaming` when enabled a double-click on a recorder-track name can be used to change the name
 
 ## Customization
 
