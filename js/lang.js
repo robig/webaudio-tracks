@@ -1,5 +1,6 @@
 function _(keyIn) {
 	var userLang = navigator.language || navigator.userLanguage;
+	userLang=userLang.substring(0,2);
 	const data={
 		"de": {
 			'delete': 'Löschen',
